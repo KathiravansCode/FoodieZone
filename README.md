@@ -139,7 +139,7 @@ Copy code
 - Eclipse / IntelliJ / NetBeans  
 
 ### **2️⃣ Clone the Repository**
-git clone https://github.com/yourusername/FoodieZone.git
+git clone https://github.com/KathiravansCode/FoodieZone.git
 
 markdown
 Copy code
