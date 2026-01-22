@@ -20,6 +20,9 @@
     User user = (User) request.getAttribute("user");
     List<Orders> orderHistory = (List<Orders>) request.getAttribute("orderHistory");
     String successMsg = (String) request.getAttribute("orderSuccess");
+    
+    // Debug output
+ 
 %>
 
 <!-- NAVBAR -->
@@ -57,45 +60,62 @@
 
     <% if (orderHistory != null && !orderHistory.isEmpty()) { %>
         <div class="space-y-4">
-            <% for (Orders o : orderHistory) { 
+            <% 
+            for (Orders o : orderHistory) { 
+                // NULL CHECK - Skip null orders
+                if (o == null) {
+                    System.err.println("Warning: Null order found in orderHistory list");
+                    continue;
+                }
+                
                 String statusColor = "gray";
                 String statusIcon = "📦";
-                if ("CONFIRMED".equals(o.getOrderStatus())) {
-                    statusColor = "blue";
-                    statusIcon = "✓";
-                } else if ("DELIVERED".equals(o.getOrderStatus())) {
-                    statusColor = "green";
-                    statusIcon = "✓✓";
-                } else if ("PENDING".equals(o.getOrderStatus())) {
-                    statusColor = "yellow";
-                    statusIcon = "⏳";
+                String orderStatus = o.getOrderStatus();
+                
+                if (orderStatus != null) {
+                    if ("CONFIRMED".equals(orderStatus)) {
+                        statusColor = "blue";
+                        statusIcon = "";
+                    } else if ("DELIVERED".equals(orderStatus)) {
+                        statusColor = "green";
+                        statusIcon = "";
+                    } else if ("PENDING".equals(orderStatus)) {
+                        statusColor = "yellow";
+                        statusIcon = "⏳";
+                    }
                 }
             %>
             <div class="bg-white rounded-2xl shadow-lg p-6 hover:shadow-xl transition">
                 <div class="flex items-center justify-between mb-4">
                     <div>
-                        <h3 class="text-2xl font-bold text-gray-900 mb-1">
+                        <h3 class="text-2xl font-semibold text-gray-900 mb-1">
                             Order #<%= o.getOrderId() %>
                         </h3>
-                        <p class="text-gray-600 text-base">📅 <%= o.getCreatedAt() %></p>
+                        <p class="text-gray-600 text-base">
+                            📅 <%= o.getCreatedAt() != null ? o.getCreatedAt() : "N/A" %>
+                        </p>
                     </div>
                     <div class="text-right">
                         <div class="inline-block bg-<%= statusColor %>-100 text-<%= statusColor %>-800 px-4 py-2 rounded-full font-bold text-base mb-2">
-                            <%= statusIcon %> <%= o.getOrderStatus() %>
+                            <%= statusIcon %> <%= orderStatus != null ? orderStatus : "UNKNOWN" %>
                         </div>
-                        <p class="text-sm text-gray-600">Payment: <%= o.getPaymentStatus() %></p>
+                        <p class="text-sm text-gray-600">
+                            Payment: <%= o.getPaymentStatus() != null ? o.getPaymentStatus() : "N/A" %>
+                        </p>
                     </div>
                 </div>
 
                 <div class="flex items-center justify-between pt-4 border-t">
                     <div>
                         <p class="text-gray-600 text-base mb-1">Total Amount</p>
-                        <p class="text-3xl font-bold text-brand">₹<%= o.getTotalAmount() %></p>
+                        <p class="text-xl font-semibold text-brand">₹<%= o.getTotalAmount() %></p>
                     </div>
                     <div class="flex items-center gap-4">
                         <div class="text-right">
                             <p class="text-gray-600 text-sm">Payment Method</p>
-                            <p class="font-semibold text-base"><%= o.getPaymentMode() %></p>
+                            <p class="font-semibold text-base">
+                                <%= o.getPaymentMode() != null ? o.getPaymentMode() : "N/A" %>
+                            </p>
                         </div>
                         <a href="order-details?orderId=<%= o.getOrderId() %>"
                            class="px-6 py-3 bg-brand text-white rounded-xl hover:bg-brandDark transition font-semibold text-base">

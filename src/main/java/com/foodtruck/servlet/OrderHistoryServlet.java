@@ -15,7 +15,8 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
 
-@WebServlet("/orders")
+// FIXED: Changed URL mapping from "/orders" to "/order-history"
+@WebServlet("/order-history")
 public class OrderHistoryServlet extends HttpServlet {
     private static final long serialVersionUID = 1L;
     private OrderDAO orderDAO;
@@ -36,12 +37,19 @@ public class OrderHistoryServlet extends HttpServlet {
         }
 
         try {
-            // Fetch all previous orders for the current user using the new DAO method
-            List<Orders> orderHistory = orderDAO.getOrdersByUserId(currentUser.getUserId());
+            int userId = currentUser.getUserId();
+            
+            // Fetch all previous orders for the current user
+            List<Orders> orderHistory = orderDAO.getOrdersByUserId(userId);
+            
+            // Debug logging
+//            System.out.println("User ID: " + userId);
+//            System.out.println("Orders found: " + (orderHistory != null ? orderHistory.size() : 0));
             
             String placed = request.getParameter("placed");
             if ("success".equals(placed)) {
-                request.setAttribute("orderSuccess", "Order #" + request.getParameter("orderId") + " placed successfully!");
+                String orderId = request.getParameter("orderId");
+                request.setAttribute("orderSuccess", "Order #" + orderId + " placed successfully!");
             }
             
             request.setAttribute("orderHistory", orderHistory);
