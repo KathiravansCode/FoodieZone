@@ -60,10 +60,15 @@ public class MenuDAOImpl implements MenuDAO {
             ps.setString(2, menu.getItemName());
             ps.setString(3, menu.getDescription());
             ps.setDouble(4, menu.getPrice());
-            
             ps.setBoolean(5, menu.isAvailable());
             ps.setInt(6, menu.getEstimatedTime());
-            ps.setBinaryStream(7,menu.getItemImage());
+            
+            // Handle null image
+            if (menu.getItemImage() != null) {
+                ps.setBinaryStream(7, menu.getItemImage());
+            } else {
+                ps.setNull(7, java.sql.Types.BLOB);
+            }
 
             int affected = ps.executeUpdate();
             if (affected > 0) {
@@ -97,22 +102,40 @@ public class MenuDAOImpl implements MenuDAO {
 
     @Override
     public int updateMenu(Menu menu) {
-        String sql = "UPDATE MENU SET itemName=?, description=?, price=?,  isAvailable=?, estimatedTime=?,itemImage=? WHERE menuId=?";
-        try (Connection conn = DBConnection.getConnection();
-             PreparedStatement ps = conn.prepareStatement(sql)) {
+        // Check if image is being updated
+        if (menu.getItemImage() != null) {
+            // Update with new image
+            String sql = "UPDATE MENU SET itemName=?, description=?, price=?, isAvailable=?, estimatedTime=?, itemImage=? WHERE menuId=?";
+            try (Connection conn = DBConnection.getConnection();
+                 PreparedStatement ps = conn.prepareStatement(sql)) {
 
-            ps.setString(1, menu.getItemName());
-            ps.setString(2, menu.getDescription());
-            ps.setDouble(3, menu.getPrice());
-            
-            ps.setBoolean(4, menu.isAvailable());
-          
-            ps.setInt(5, menu.getEstimatedTime());
-            ps.setBinaryStream(6, menu.getItemImage());
-            ps.setInt(7, menu.getMenuId());
-            return ps.executeUpdate();
-        } catch (Exception e) {
-            e.printStackTrace();
+                ps.setString(1, menu.getItemName());
+                ps.setString(2, menu.getDescription());
+                ps.setDouble(3, menu.getPrice());
+                ps.setBoolean(4, menu.isAvailable());
+                ps.setInt(5, menu.getEstimatedTime());
+                ps.setBinaryStream(6, menu.getItemImage());
+                ps.setInt(7, menu.getMenuId());
+                return ps.executeUpdate();
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        } else {
+            // Update without changing image
+            String sql = "UPDATE MENU SET itemName=?, description=?, price=?, isAvailable=?, estimatedTime=? WHERE menuId=?";
+            try (Connection conn = DBConnection.getConnection();
+                 PreparedStatement ps = conn.prepareStatement(sql)) {
+
+                ps.setString(1, menu.getItemName());
+                ps.setString(2, menu.getDescription());
+                ps.setDouble(3, menu.getPrice());
+                ps.setBoolean(4, menu.isAvailable());
+                ps.setInt(5, menu.getEstimatedTime());
+                ps.setInt(6, menu.getMenuId());
+                return ps.executeUpdate();
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
         }
         return 0;
     }

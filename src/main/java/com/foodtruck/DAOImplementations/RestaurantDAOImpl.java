@@ -62,7 +62,13 @@ public class RestaurantDAOImpl implements RestaurantDAO {
             ps.setString(4, restaurant.getRestaurantStatus());
             ps.setInt(5, restaurant.getAdminId());
             ps.setString(6, restaurant.getPhone());
-            ps.setBinaryStream(7, restaurant.getRestaurantImage());
+            
+            // Handle null image
+            if (restaurant.getRestaurantImage() != null) {
+                ps.setBinaryStream(7, restaurant.getRestaurantImage());
+            } else {
+                ps.setNull(7, java.sql.Types.BLOB);
+            }
             
             int affected = ps.executeUpdate();
             if (affected > 0) {
@@ -97,21 +103,42 @@ public class RestaurantDAOImpl implements RestaurantDAO {
 
     @Override
     public int updateRestaurant(Restaurant restaurant) {
-        String sql = "UPDATE RESTAURANT SET name=?, rating=?, address=?, restaurantStatus=?, phone=?, restaurantImage=? WHERE restaurantId=?";
-        try (Connection conn = DBConnection.getConnection();
-             PreparedStatement ps = conn.prepareStatement(sql)) {
+        // Check if image is being updated
+        if (restaurant.getRestaurantImage() != null) {
+            // Update with new image
+            String sql = "UPDATE RESTAURANT SET name=?, rating=?, address=?, restaurantStatus=?, phone=?, restaurantImage=? WHERE restaurantId=?";
+            try (Connection conn = DBConnection.getConnection();
+                 PreparedStatement ps = conn.prepareStatement(sql)) {
 
-            ps.setString(1, restaurant.getName());
-            ps.setDouble(2, restaurant.getRating());
-            ps.setString(3, restaurant.getAddress());
-            ps.setString(4, restaurant.getRestaurantStatus());
-            ps.setString(5, restaurant.getPhone());
-            ps.setBinaryStream(6, restaurant.getRestaurantImage());
-            ps.setInt(7, restaurant.getRestaurantId());
+                ps.setString(1, restaurant.getName());
+                ps.setDouble(2, restaurant.getRating());
+                ps.setString(3, restaurant.getAddress());
+                ps.setString(4, restaurant.getRestaurantStatus());
+                ps.setString(5, restaurant.getPhone());
+                ps.setBinaryStream(6, restaurant.getRestaurantImage());
+                ps.setInt(7, restaurant.getRestaurantId());
 
-            return ps.executeUpdate();
-        } catch (Exception e) {
-            e.printStackTrace();
+                return ps.executeUpdate();
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        } else {
+            // Update without changing image
+            String sql = "UPDATE RESTAURANT SET name=?, rating=?, address=?, restaurantStatus=?, phone=? WHERE restaurantId=?";
+            try (Connection conn = DBConnection.getConnection();
+                 PreparedStatement ps = conn.prepareStatement(sql)) {
+
+                ps.setString(1, restaurant.getName());
+                ps.setDouble(2, restaurant.getRating());
+                ps.setString(3, restaurant.getAddress());
+                ps.setString(4, restaurant.getRestaurantStatus());
+                ps.setString(5, restaurant.getPhone());
+                ps.setInt(6, restaurant.getRestaurantId());
+
+                return ps.executeUpdate();
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
         }
         return 0;
     }

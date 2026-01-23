@@ -85,11 +85,12 @@ public class RestaurantManagementServlet extends HttpServlet {
             }
             restaurant.setAdminId(adminUser.getUserId());
             
-            // Handle Image Upload (InputStream logic)
+            // Handle Image Upload - ONLY set if file is uploaded
             Part filePart = request.getPart("restaurantImage");
             if (filePart != null && filePart.getSize() > 0) {
                 restaurant.setRestaurantImage(filePart.getInputStream());
             }
+            // If no file uploaded, restaurantImage remains null (database will keep existing image on update)
 
             int rows = 0;
             if ("add".equals(action)) {
